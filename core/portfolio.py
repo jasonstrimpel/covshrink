@@ -187,7 +187,7 @@ class Portfolio(object):
         """
         shares = self._shrs
         portfolio = self._build_portfolio(shares)
-        print portfolio['price']
+        
         mkt_val = portfolio['shares'] * portfolio['price']
         portfolio_val = mkt_val.sum()
         
@@ -212,7 +212,7 @@ class Portfolio(object):
         holding_period_returns = {}
         for position in positions:
             prices = self._get_historic_data(position, holding_periods[position]['start'], holding_periods[position]['end'])
-            holding_period_returns[position] = (prices['close'][-1] / prices['close'][0]) - 1
+            holding_period_returns[position] = (prices['adjustedClose'][-1] / prices['adjustedClose'][0]) - 1
         
         return pandas.DataFrame({
             'holding_period_return': holding_period_returns
@@ -458,6 +458,8 @@ port = Portfolio(portfolio, bench)
 #print port._get_historic_data(ticker, start, end)
 #print port._get_historic_returns(ticker, start, end)
 #print port.get_benchmark_weights()
-print port.get_active_weights()
+#print port.get_active_weights()
 #print port.get_portfolio_weights()
 #print port.get_holding_period_returns()
+#print port.get_covariance_matrix()
+#print port.get_active_returns()
