@@ -98,7 +98,7 @@ def insert(ticker, start, end, frequency):
     price_data = h5f.getNode('/price_data')
     
     fh = _fetch_historical_yahoo(ticker, start, end, frequency)
-    # mlab.csv2rec converts lines in a csv to a record
+    # converts lines in a csv to a record
     row = list(mlab.csv2rec(fh))
     fh.close()
 
