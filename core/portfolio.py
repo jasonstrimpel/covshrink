@@ -327,7 +327,7 @@ class Portfolio(object):
         bench_weights = self.get_benchmark_weights()
         cov_matrix = self.get_covariance_matrix()
         
-        pass
+        return bench_weights
 
     def get_expected_portfolio_return(self):
         """
@@ -441,8 +441,8 @@ bench = {
     'c': 0.05,
     'jpm': 0.15,
     'tgt': 0.08,
-    'wmt': 0.10,
-    'siri': 0.06,
+    'wmt': 0.12,
+    'siri': 0.08,
     'x': 0.05,
     'ibm': 0.15,
     'aapl': 0.09,
@@ -456,10 +456,24 @@ end = datetime(2011,1,31)
 port = Portfolio(portfolio, bench)
 
 #print port._get_historic_data(ticker, start, end)
-#print port._get_historic_returns(ticker, start, end)
-#print port.get_benchmark_weights()
+#print port._get_historic_returns(ticker, start, end, offset=1)
+#print port._build_portfolio(shares)
+#print port.get_benchmark_weights().as_matrix()
 #print port.get_active_weights()
 #print port.get_portfolio_weights()
 #print port.get_holding_period_returns()
-#print port.get_covariance_matrix()
+#print port.get_expected_stock_returns()
 #print port.get_active_returns()
+#print port.get_expected_excess_stock_returns()
+#print port.get_covariance_matrix().as_matrix()
+#print port.get_expected_benchmark_return()
+#print port.get_benchmark_variance() # to do
+#print port.get_expected_portfolio_return()
+#print port.get_portfolio_variance() # to do
+#print port.get_expected_excess_portfolio_return()
+#print port.get_tracking_error_variance() # to do
+
+wts = port.get_benchmark_weights()
+cov = port.get_covariance_matrix()
+
+print np.dot(wts.T, np.dot(cov, wts))
