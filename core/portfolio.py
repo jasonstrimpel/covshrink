@@ -92,7 +92,7 @@ class Portfolio(object):
         data = dict(zip(colnames, cols))
         
         dates = pandas.Index([datetime.fromtimestamp(d) for d in data['date']])
-        return pandas.DataMatrix(data, index=dates).sort(ascending=True)
+        return pandas.DataMatrix(data, index=dates, dtype='float').sort(ascending=True)
 
     def _get_historic_returns(self, ticker, start, end, offset=1):
         """Calculates the offset-period return for the given tickers and combines in a DataFrame
@@ -114,7 +114,7 @@ class Portfolio(object):
         frame = self._get_historic_data(ticker, start, end)
         prices[ticker] = frame['adjustedClose']
         
-        prices_frame = pandas.DataFrame(prices)
+        prices_frame = pandas.DataFrame(prices, dtype='float')
         
         return prices_frame / prices_frame.shift(offset) - 1
 
@@ -187,7 +187,7 @@ class Portfolio(object):
         """
         shares = self._shrs
         portfolio = self._build_portfolio(shares)
-        
+        print portfolio['price']
         mkt_val = portfolio['shares'] * portfolio['price']
         portfolio_val = mkt_val.sum()
         
@@ -454,10 +454,10 @@ start =  datetime(2011,1,1)
 end = datetime(2011,1,31)
 
 port = Portfolio(portfolio, bench)
-#ret = port.get_covariance_matrix()
-print port._get_historic_data(ticker, start, end)
+
+#print port._get_historic_data(ticker, start, end)
 #print port._get_historic_returns(ticker, start, end)
 #print port.get_benchmark_weights()
-#print port.get_active_weights()
+print port.get_active_weights()
 #print port.get_portfolio_weights()
-print port.get_holding_period_returns()
+#print port.get_holding_period_returns()
