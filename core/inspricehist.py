@@ -51,10 +51,9 @@ def _fetch_historical_yahoo(ticker, date1, date2, freq='w', proxy=None, cachenam
     url =  urlFmt % (d1[0], d1[1], d1[2],
                      d2[0], d2[1], d2[2], ticker, freq)
 
-    proxy = {"http": "http://proxy.jpmchase.net:8443"}
+    #proxy = {"http": "http://proxy.jpmchase.net:8443"}
 
     if proxy:
-        
         proxy_support = urllib2.ProxyHandler(proxy)
         opener = urllib2.build_opener(proxy_support)
         urllib2.install_opener(opener)

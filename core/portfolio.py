@@ -327,7 +327,9 @@ class Portfolio(object):
         bench_weights = self.get_benchmark_weights()
         cov_matrix = self.get_covariance_matrix()
         
-        return bench_weights
+        return pandas.DataFrame({
+            'benchmark_variance': np.dot(bench_weights.T, np.dot(cov_matrix, bench_weights))
+        })
 
     def get_expected_portfolio_return(self):
         """
@@ -358,7 +360,12 @@ class Portfolio(object):
         
         
         """
-        pass
+        port_weights = self.get_portfolio_weights()
+        cov_matrix = self.get_covariance_matrix()
+        
+        return pandas.DataFrame({
+            'portfolio_variance': np.dot(port_weights.T, np.dot(cov_matrix, port_weights))
+        })
 
     def get_expected_excess_portfolio_return(self):
         """
@@ -389,7 +396,12 @@ class Portfolio(object):
         
         
         """
-        pass
+        active_weights = self.get_active_weights()
+        cov_matrix = self.get_covariance_matrix()
+        
+        return pandas.DataFrame({
+            'tracking_error_variance': np.dot(active_weights.T, np.dot(cov_matrix, active_weights))
+        })
 
 portfolio = {
     'expected_returns': {
@@ -458,7 +470,7 @@ port = Portfolio(portfolio, bench)
 #print port._get_historic_data(ticker, start, end)
 #print port._get_historic_returns(ticker, start, end, offset=1)
 #print port._build_portfolio(shares)
-#print port.get_benchmark_weights().as_matrix()
+#print port.get_benchmark_weights()
 #print port.get_active_weights()
 #print port.get_portfolio_weights()
 #print port.get_holding_period_returns()
@@ -467,13 +479,12 @@ port = Portfolio(portfolio, bench)
 #print port.get_expected_excess_stock_returns()
 #print port.get_covariance_matrix().as_matrix()
 #print port.get_expected_benchmark_return()
-#print port.get_benchmark_variance() # to do
+#print port.get_benchmark_variance()
 #print port.get_expected_portfolio_return()
-#print port.get_portfolio_variance() # to do
+#print port.get_portfolio_variance()
 #print port.get_expected_excess_portfolio_return()
-#print port.get_tracking_error_variance() # to do
+#print port.get_tracking_error_variance()
 
-wts = port.get_benchmark_weights()
-cov = port.get_covariance_matrix()
-
-print np.dot(wts.T, np.dot(cov, wts))
+#wts = port.get_benchmark_weights()
+#cov = port.get_covariance_matrix()
+#print np.dot(wts.T, np.dot(cov, wts))
