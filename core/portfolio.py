@@ -14,8 +14,13 @@ import inspricehist
 
 __all__ = ['_get_historic_data', '_get_historic_returns', '_build_portfolio', 'get_benchmark_weights', 
                 'get_active_weights', 'get_portfolio_weights', 'get_holding_period_returns', 'get_expected_stock_returns',
-                'get_active_returns', 'get_expected_excess_stock_returns', 'get_expected_benchmark_return',
-                'get_expected_portfolio_return', 'get_expected_excess_portfolio_return']
+                'get_active_returns', 'get_expected_excess_stock_returns', 'get_covariance_matrix',
+                'get_expected_benchmark_return', 'get_benchmark_variance', 'get_expected_portfolio_return',
+                'get_portfolio_variance', 'get_expected_excess_portfolio_return', 'get_tracking_error_variance']
+
+__version__ = '0.1'
+
+__author__ = 'Jason Strimpel'
 
 class Portfolio(object):
 
@@ -59,7 +64,7 @@ class Portfolio(object):
             inspricehist.insert(symbol, holding_periods[symbol]['start'], holding_periods[symbol]['end'], frequency)
 
     def _get_historic_data(self, ticker, start, end):
-        """Gets the open, high, low, close, and volume for the given ticker from start to end
+        """Gets the open, high, low, close, volume, and adjusted close for the given ticker from start to end
         
         Parameters
         ----------
@@ -485,6 +490,3 @@ port = Portfolio(portfolio, bench)
 #print port.get_expected_excess_portfolio_return()
 #print port.get_tracking_error_variance()
 
-#wts = port.get_benchmark_weights()
-#cov = port.get_covariance_matrix()
-#print np.dot(wts.T, np.dot(cov, wts))
