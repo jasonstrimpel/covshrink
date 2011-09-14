@@ -446,16 +446,13 @@ portfolio = {
         'goog':10
     },
     'constraints': {
-        'max_position': 0.10
+        'max_position': 0.10,
+        'target_gain': 0.03
     },
     'defaults': {
         'frequency': 'w'
     }
 }
-
-
-
-
 
 bench = {
     'gs': 0.08,
