@@ -16,7 +16,7 @@ __all__ = ['_get_historic_data', '_get_historic_returns', '_build_portfolio', 'g
                 'get_active_weights', 'get_portfolio_weights', 'get_holding_period_returns', 'get_expected_stock_returns',
                 'get_active_returns', 'get_expected_excess_stock_returns', 'get_covariance_matrix',
                 'get_expected_benchmark_return', 'get_benchmark_variance', 'get_expected_portfolio_return',
-                'get_portfolio_variance', 'get_expected_excess_portfolio_return', 'get_tracking_error_variance']
+                'get_portfolio_variance', 'get_expected_excess_portfolio_return', 'get_tracking_error_variance', 'get_portfolio_size']
 
 __version__ = '0.1'
 
@@ -41,8 +41,33 @@ class Portfolio(object):
         
         Usage
         -------
-        port = Portfolio(portfolio, bench)
+        import params
         
+        port_params = params.get_portfolio_params();
+        bench_params = params.get_bench_params();
+        
+        port = Portfolio(port_params, bench_params)
+        
+        # internal (private) methods
+        print port._get_historic_data(ticker, start, end)
+        print port._get_historic_returns(ticker, start, end, offset=1)
+        print port._build_portfolio(shares)
+        
+        #  public methods
+        print port.get_benchmark_weights()
+        print port.get_active_weights()
+        print port.get_portfolio_weights()
+        print port.get_holding_period_returns()
+        print port.get_expected_stock_returns()
+        print port.get_active_returns()
+        print port.get_expected_excess_stock_returns()
+        print port.get_covariance_matrix()
+        print port.get_expected_benchmark_return()
+        print port.get_benchmark_variance()
+        print port.get_expected_portfolio_return()
+        print port.get_portfolio_variance()
+        print port.get_expected_excess_portfolio_return()
+        print port.get_tracking_error_variance()
         """
         # do error checking here
         
@@ -407,87 +432,18 @@ class Portfolio(object):
         return pandas.DataFrame({
             'tracking_error_variance': np.dot(active_weights.T, np.dot(cov_matrix, active_weights))
         })
-
-portfolio = {
-    'expected_returns': {
-        'gs': 0.08,
-        'c': 0.05,
-        'jpm': 0.15,
-        'tgt': 0.08,
-        'wmt': 0.10,
-        'siri': 0.06,
-        'x': 0.05,
-        'ibm': 0.15,
-        'aapl': 0.09,
-        'goog': 0.15
-    },
-    'holding_periods': {
-        'gs': {'start': datetime(2009, 8, 1), 'end': datetime(2011, 8, 23)},
-        'c': {'start': datetime(2009, 8, 1), 'end': datetime(2011, 8, 23)},
-        'jpm': {'start': datetime(2009, 8, 1), 'end': datetime(2011, 8, 23)},
-        'tgt': {'start': datetime(2009, 8, 1), 'end': datetime(2011, 8, 23)},
-        'wmt': {'start': datetime(2009, 8, 1), 'end': datetime(2011, 8, 23)},
-        'siri': {'start': datetime(2009, 8, 1), 'end': datetime(2011, 8, 23)},
-        'x': {'start': datetime(2009, 8, 1), 'end': datetime(2011, 8, 23)},
-        'ibm': {'start': datetime(2009, 8, 1), 'end': datetime(2011, 8, 23)},
-        'aapl': {'start': datetime(2009, 8, 1), 'end': datetime(2011, 8, 23)},
-        'goog': {'start': datetime(2009, 8, 1), 'end': datetime(2011, 8, 23)}
-    },
-    'shares': {
-        'gs': 10,
-        'c': 50,
-        'jpm': 100,
-        'tgt': 50,
-        'wmt': 50,
-        'siri': 1000,
-        'x': 25,
-        'ibm': 20,
-        'aapl': 5,
-        'goog':10
-    },
-    'constraints': {
-        'max_position': 0.10,
-        'target_gain': 0.03
-    },
-    'defaults': {
-        'frequency': 'w'
-    }
-}
-
-bench = {
-    'gs': 0.08,
-    'c': 0.05,
-    'jpm': 0.15,
-    'tgt': 0.08,
-    'wmt': 0.12,
-    'siri': 0.08,
-    'x': 0.05,
-    'ibm': 0.15,
-    'aapl': 0.09,
-    'goog': 0.15
-}
-
-ticker = 'gs'
-start =  datetime(2011,1,1)
-end = datetime(2011,1,31)
-
-port = Portfolio(portfolio, bench)
-
-#print port._get_historic_data(ticker, start, end)
-#print port._get_historic_returns(ticker, start, end, offset=1)
-#print port._build_portfolio(shares)
-#print port.get_benchmark_weights()
-#print port.get_active_weights()
-#print port.get_portfolio_weights()
-#print port.get_holding_period_returns()
-#print port.get_expected_stock_returns()
-#print port.get_active_returns()
-#print port.get_expected_excess_stock_returns()
-#print port.get_covariance_matrix().as_matrix()
-#print port.get_expected_benchmark_return()
-#print port.get_benchmark_variance()
-#print port.get_expected_portfolio_return()
-#print port.get_portfolio_variance()
-#print port.get_expected_excess_portfolio_return()
-#print port.get_tracking_error_variance()
-
+    
+    def get_portfolio_size(self):
+        """
+        
+        Parameters
+        ----------
+        
+        Returns
+        -------
+        
+        
+        """
+        holding_periods = self._hld_per
+        positions = holding_periods.keys()
+        return len(positions)
