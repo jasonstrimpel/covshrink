@@ -58,11 +58,11 @@ risks = [ sqrt(dot(x, S*x)) for x in portfolios ]
 # Plot trade-off curve and optimal allocations.
 pylab.figure(1, facecolor='w')
 pylab.plot(risks, returns)
-pylab.xlabel('standard deviation')
-pylab.ylabel('expected return')
+pylab.xlabel('Sstandard Deviation of Portfolio Returns')
+pylab.ylabel('Expected Portfolio Returns')
 #axis([xmin, xmax, ymin, ymax])
 pylab.axis([min(risks)-0.0005, max(risks)+0.0005, min(returns)-0.0005, max(returns)+0.0005])
-pylab.title('Risk-return trade-off curve (fig 4.12)')
+pylab.title('Efficient Frontier')
 #pylab.yticks([0.00, 0.05, 0.10, 0.15])
 
 pylab.show()
