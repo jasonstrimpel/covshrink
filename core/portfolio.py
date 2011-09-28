@@ -324,7 +324,6 @@ class Portfolio(object):
 
         return pandas.DataFrame(cv, index=frame.columns, columns=frame.columns)
 
-
     def get_expected_benchmark_return(self):
         """
         
@@ -432,7 +431,7 @@ class Portfolio(object):
         return pandas.DataFrame({
             'tracking_error_variance': np.dot(active_weights.T, np.dot(cov_matrix, active_weights))
         })
-    
+
     def get_portfolio_size(self):
         """
         
