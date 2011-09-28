@@ -39,24 +39,26 @@ def get_portfolio_params():
             'goog':10
         },
         'constraints': {
-            'max_position': 0.10,
+            'min_position': 0.05,
+            'max_position': 0.15,
             'target_gain': 0.03
         },
         'defaults': {
             'frequency': 'w'
         }
     }
-    
+
+# s&p 500 weights as of 9/28/2011
 def get_bench_params():
     return {
-        'gs': 0.08,
-        'c': 0.05,
-        'jpm': 0.15,
-        'tgt': 0.08,
-        'wmt': 0.12,
-        'f': 0.08,
-        'x': 0.05,
-        'ibm': 0.15,
-        'aapl': 0.09,
-        'goog': 0.15
+        'gs': 0.00454,
+        'c': 0.007164,
+        'jpm': 0.011177,
+        'tgt': 0.003128,
+        'wmt': 0.016334,
+        'f': 0.003508,
+        'x': 0.000299,
+        'ibm': 0.019615,
+        'aapl': 0.034093,
+        'goog': 0.01581
     }
