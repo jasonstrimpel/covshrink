@@ -12,11 +12,6 @@ import pylab
 import params
 import portfolio
 
-class Optimize(object):
-    
-    def __init__(self):        
-        pass
-
 # turn off display of optimizations
 solvers.options['show_progress'] = False
 
@@ -31,16 +26,16 @@ port = portfolio.Portfolio(port_params, bench_params)
 n = port.get_portfolio_size()
 S = matrix(port.get_covariance_matrix().as_matrix())
 pbar = matrix(port.get_expected_stock_returns().as_matrix())
-print pbar
+
 # n x n matrix of zeros
-G = matrix(0.0, (n,n))
+G = matrix(0.0, (n,n)) #original
 
 # diagonal matrix with -1.0 in the diagonal
-G[::n+1] = -1.0
+G[::n+1] = -1.0 #new
 
 # n x 1 matrix of 0.0s
 # this appears to be the constraint that x >= 0
-h = matrix(0.0, (n,1))
+h = matrix(0.0, (n,1)) # original
 
 # 1 x n matrix of 1.0s
 # this appears to be the constraint that 1Tx = 1
@@ -66,11 +61,11 @@ pylab.plot(risks, returns)
 pylab.xlabel('standard deviation')
 pylab.ylabel('expected return')
 #axis([xmin, xmax, ymin, ymax])
-pylab.axis([min(risks)-0.0002, max(risks)+0.0002, min(returns)-0.0002, max(returns)+0.0002])
+pylab.axis([min(risks)-0.0005, max(risks)+0.0005, min(returns)-0.0005, max(returns)+0.0005])
 pylab.title('Risk-return trade-off curve (fig 4.12)')
 #pylab.yticks([0.00, 0.05, 0.10, 0.15])
 
-#pylab.show()
+pylab.show()
 
 '''
 pylab.figure(2, facecolor='w')
