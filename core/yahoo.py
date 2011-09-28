@@ -5,8 +5,8 @@ class Yahoo(object):
     
     def __init__(self, ticker_list):
         
-        #proxy ={"http": "http://proxy.jpmchase.net:8443"}
-        proxy = None
+        proxy ={"http": "http://proxy.jpmchase.net:8443"}
+
         if proxy:
             
             proxy_support = urllib2.ProxyHandler(proxy)
