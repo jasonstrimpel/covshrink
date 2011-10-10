@@ -142,9 +142,8 @@ class Portfolio(object):
         """
         prices = {}
         frame = self._get_historic_data(ticker, start, end)
-        prices[ticker] = frame['adjustedClose']
-        
-        prices_frame = pandas.DataFrame(prices, dtype='float')
+
+        prices_frame = pandas.Series(frame['adjustedClose'], dtype='float')
         
         return prices_frame / prices_frame.shift(offset) - 1
 
@@ -170,6 +169,77 @@ class Portfolio(object):
         portfolio['price'] = prices
 
         return pandas.DataFrame(portfolio)
+
+    def get_portfolio_historic_returns(self):
+        """
+        
+        Parameters
+        ----------
+        
+        Returns
+        -------
+        
+        
+        """
+        shares = self._shrs
+        positions = shares.keys()
+        periods = self._hld_per 
+        
+        returns = {}; portfolio = {}
+        for position in positions:
+            returns[position] = self._get_historic_returns(position, periods[position]['start'], periods[position]['end'])
+ 
+        return pandas.DataFrame(returns)
+
+    def get_portfolio_historic_position_values(self, shares=None):
+        """
+        
+        Parameters
+        ----------
+        
+        Returns
+        -------
+        
+        
+        """
+        if shares is None:
+            shares = self._shrs
+        
+        positions = shares.keys()
+        periods = self._hld_per 
+        
+        prices = {}; portfolio = {}
+        for position in positions:
+            frame = self._get_historic_data(position, periods[position]['start'], periods[position]['end'])
+            prices[position] = frame['adjustedClose'] * shares[position]
+ 
+        return pandas.DataFrame(prices)
+
+    def get_portfolio_historic_values(self, shares=None):
+        """
+        
+        Parameters
+        ----------
+        
+        Returns
+        -------
+        
+        
+        """
+        if shares is None:
+            shares = self._shrs
+        
+        positions = shares.keys()
+        periods = self._hld_per 
+        
+        values = {}
+        for position in positions:
+            frame = self._get_historic_data(position, periods[position]['start'], periods[position]['end'])
+            values[position] = frame['adjustedClose'] * shares[position]
+ 
+        portfolio = pandas.DataFrame(values).sum(axis=1)
+ 
+        return pandas.Series(portfolio)
 
     def get_benchmark_weights(self):
         """
