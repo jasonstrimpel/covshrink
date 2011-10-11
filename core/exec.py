@@ -65,7 +65,7 @@ pylab.axis([min(risks)-0.0005, max(risks)+0.0005, min(returns)-0.0005, max(retur
 pylab.title('Efficient Frontier')
 #pylab.yticks([0.00, 0.05, 0.10, 0.15])
 
-#pylab.show()
+pylab.show()
 
 '''
 pylab.figure(2, facecolor='w')

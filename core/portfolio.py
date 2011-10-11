@@ -10,7 +10,7 @@ import tables
 
 # custom modules
 import yahoo
-import inspricehist
+import inspricehist as ph
 
 __all__ = ['_get_historic_data', '_get_historic_returns', '_build_portfolio', 'get_benchmark_weights', 
                 'get_active_weights', 'get_portfolio_weights', 'get_holding_period_returns', 'get_expected_stock_returns',
@@ -78,28 +78,30 @@ class Portfolio(object):
         self._hld_per = holding_periods
         self._shrs = portfolio['shares']
         self._freq = frequency
+        
+        # proxy if you have a proxy
+        self._proxy = {"http": "http://proxy.jpmchase.net:8443"}
     
         self._bench_wts = benchmark
         
         # build the table for the data
         import createdailytable
         
+        phobj = ph.InsertPriceHist(self._proxy)
+        
         # load the data into the data table
         for symbol in holding_periods.keys():
-            inspricehist.insert(symbol, holding_periods[symbol]['start'], holding_periods[symbol]['end'], frequency)
+            phobj.insert(symbol, holding_periods[symbol]['start'], holding_periods[symbol]['end'], frequency)
 
     def _get_historic_data(self, ticker, start, end):
-        """Gets the open, high, low, close, volume, and adjusted close for the given ticker from start to end
+        """
         
         Parameters
         ----------
-        (string) ticker : ticker symbol of the stock for which to get data
-        (datetime) start : start date for historic data
-        (datetime) end : end date for historic data
+
         
         Returns
         -------
-        DataFrame : pandas.DataFrame object with open, high, low, close, and volume
         
         """
         frequency = self._freq
@@ -122,30 +124,23 @@ class Portfolio(object):
         data = dict(zip(colnames, cols))
         
         dates = pandas.Index([datetime.fromtimestamp(d) for d in data['date']])
-        return pandas.DataMatrix(data, index=dates, dtype='float').sort(ascending=True)
+        return pandas.DataFrame(data, index=dates, dtype='float').sort(ascending=True)
 
     def _get_historic_returns(self, ticker, start, end, offset=1):
-        """Calculates the offset-period return for the given tickers and combines in a DataFrame
+        """
         
         Parameters
         ----------
-        (list) tickers : ticker symbols for which to include offset-period returns in the
-            DataFrame
-        (datetime) start : start date for historic data
-        (datetime) end : end date for historic data
-        (int) : offset for which to calculate returns
+
         
         Returns
         -------
-        DataFrame : pandas.DataFrame object with offset-period returns for each ticker in tickers
+
         
         """
-        prices = {}
-        frame = self._get_historic_data(ticker, start, end)
 
-        prices_frame = pandas.Series(frame['adjustedClose'], dtype='float')
-        
-        return prices_frame / prices_frame.shift(offset) - 1
+        prices = self._get_historic_data(ticker, start, end)
+        return pandas.Series(prices['adjustedClose'] / prices['adjustedClose'].shift(offset) - 1)
 
     def _build_portfolio(self, shares):
         """
@@ -159,7 +154,8 @@ class Portfolio(object):
         
         """
         positions = shares.keys()
-        yh = yahoo.Yahoo(positions)
+        proxy = self._proxy
+        yh = yahoo.Yahoo(positions, proxy)
         
         prices = {}; portfolio = {}
         for position in positions:
@@ -185,10 +181,11 @@ class Portfolio(object):
         positions = shares.keys()
         periods = self._hld_per 
         
-        returns = {}; portfolio = {}
+        returns = {}
         for position in positions:
             returns[position] = self._get_historic_returns(position, periods[position]['start'], periods[position]['end'])
- 
+        
+        #return returns
         return pandas.DataFrame(returns)
 
     def get_portfolio_historic_position_values(self, shares=None):
@@ -234,8 +231,8 @@ class Portfolio(object):
         
         values = {}
         for position in positions:
-            frame = self._get_historic_data(position, periods[position]['start'], periods[position]['end'])
-            values[position] = frame['adjustedClose'] * shares[position]
+            prices = self._get_historic_data(position, periods[position]['start'], periods[position]['end'])
+            values[position] = prices['adjustedClose'] * shares[position]
  
         portfolio = pandas.DataFrame(values).sum(axis=1)
  
@@ -385,14 +382,23 @@ class Portfolio(object):
         
         historic_returns = {}
         for position in positions:
-            returns = self._get_historic_returns(position, holding_periods[position]['start'], holding_periods[position]['end'])
-            historic_returns[position] = returns[position]
+            historic_returns[position] = self._get_historic_returns(position, holding_periods[position]['start'], holding_periods[position]['end'])
 
         frame = pandas.DataFrame(historic_returns).dropna()
+        return pandas.DataFrame(np.cov(frame,  rowvar=0), index=frame.columns, columns=frame.columns)
 
-        cv = np.cov(frame,  rowvar=0)
-
-        return pandas.DataFrame(cv, index=frame.columns, columns=frame.columns)
+    def get_shrunk_covariance_matrix(self):
+        """
+        
+        Parameters
+        ----------
+        
+        Returns
+        -------
+        
+        
+        """
+        pass
 
     def get_expected_benchmark_return(self):
         """
