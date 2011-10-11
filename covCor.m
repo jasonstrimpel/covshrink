@@ -8,6 +8,7 @@ function [sigma,shrinkage]=covCor(x,shrink)
 % if shrink is specified then this const. is used for shrinkage
 
 % The notation follows Ledoit and Wolf (2004)
+% http://www.ledoit.net/honey_abstract.htm
 % This version: 06/2009
 
 % de-mean returns
@@ -25,7 +26,7 @@ rho=(sum(sum(sample./(sqrtvar(:,ones(n,1)).*sqrtvar(:,ones(n,1))')))-n)/(n*(n-1)
 prior=rho*sqrtvar(:,ones(n,1)).*sqrtvar(:,ones(n,1))';
 prior(logical(eye(n)))=var;
 
-if (nargin < 2 | shrink == -1) % compute shrinkage parameters
+if (nargin < 2 || shrink == -1) % compute shrinkage parameters
   c=norm(sample-prior,'fro')^2;
   y=x.^2;
   p=1/t*sum(sum(y'*y))-sum(sum(sample.^2));

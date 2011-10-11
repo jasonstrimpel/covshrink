@@ -12,7 +12,10 @@ import numpy as np
 import params
 import portfolio
 
-def optimize(S=None):
+# turn off display of optimizations
+solvers.options['show_progress'] = False
+
+def optimize(pbar=None, S=None):
     """
     
     Parameters
@@ -23,8 +26,6 @@ def optimize(S=None):
     
     
     """
-    # turn off display of optimizations
-    solvers.options['show_progress'] = False
 
     # get the portfolio parameters
     port_params = params.get_portfolio_params();
@@ -39,7 +40,8 @@ def optimize(S=None):
     if S is None:
         S = matrix(port.get_covariance_matrix().as_matrix())
     
-    pbar = matrix(port.get_expected_stock_returns().as_matrix())
+    if pbar is None:
+        pbar = matrix(port.get_expected_stock_returns().as_matrix())
 
     # n x n matrix of zeros
     G = matrix(0.0, (n,n)) #original
