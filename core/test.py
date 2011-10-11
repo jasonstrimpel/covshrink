@@ -1,6 +1,9 @@
 # custom modules
 import params
 import portfolio
+import optimize as op
+import numpy as np
+import pandas
 
 from datetime import datetime
 
@@ -26,6 +29,9 @@ shares = {
     'goog':10
 }
 
+x = op.optimize()
+
+'''
 # internal (private) methods
 print port._get_historic_data(ticker, start, end)
 print port._get_historic_returns(ticker, start, end, offset=1)
@@ -51,3 +57,4 @@ print port.get_expected_portfolio_return()
 print port.get_portfolio_variance()
 print port.get_expected_excess_portfolio_return()
 print port.get_tracking_error_variance()
+'''

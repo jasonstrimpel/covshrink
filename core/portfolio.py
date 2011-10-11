@@ -11,6 +11,7 @@ import tables
 # custom modules
 import yahoo
 import inspricehist as ph
+import createdailytable
 
 __all__ = ['_get_historic_data', '_get_historic_returns', '_build_portfolio', 'get_benchmark_weights', 
                 'get_active_weights', 'get_portfolio_weights', 'get_holding_period_returns', 'get_expected_stock_returns',
@@ -85,7 +86,7 @@ class Portfolio(object):
         self._bench_wts = benchmark
         
         # build the table for the data
-        import createdailytable
+        createdailytable.reset_table()
         
         phobj = ph.InsertPriceHist(self._proxy)
         
