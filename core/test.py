@@ -12,10 +12,12 @@ port_params = params.get_portfolio_params();
 bench_params = params.get_bench_params();
 
 # instantiate the porfolio object
-port = portfolio.Portfolio(port_params, bench_params)
+proxy = {"http": "http://proxy.jpmchase.net:8443"}
+port = portfolio.Portfolio(port_params, bench_params, proxy=proxy)
 ticker = 'aapl'
-start = datetime(2009, 1, 1)
-end = datetime(2009, 12, 31)
+
+start = datetime(2005, 8, 1)
+end = datetime(2011, 8, 23)
 shares = {
     'gs': 10,
     'c': 50,
@@ -30,6 +32,13 @@ shares = {
 }
 
 x = op.optimize()
+
+
+
+
+
+
+
 
 '''
 # internal (private) methods

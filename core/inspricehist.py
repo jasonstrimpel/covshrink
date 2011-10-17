@@ -19,7 +19,7 @@ class InsertPriceHist(object):
     def __init__(self, proxy=None):
         self._proxy = proxy
 
-    def _fetch_historical_yahoo(self, ticker, date1, date2, freq='w', cachename=None):
+    def _fetch_historical_yahoo(self, ticker, date1, date2, freq, cachename=None):
         """matplotlib's implementation, modified to provide proxy support and frequency
         Fetch historical data for ticker between date1 and date2.  date1 and
         date2 are date or datetime instances, or (year, month, day) sequences.
@@ -79,7 +79,7 @@ class InsertPriceHist(object):
 
         return fh
 
-    def insert(self, ticker, start, end, frequency):
+    def insert(self, ticker, start, end, frequency='w'):
         """Inserts frequency price data for ticker from start to end
         
         Parameters

@@ -25,7 +25,7 @@ __author__ = 'Jason Strimpel'
 
 class Portfolio(object):
 
-    def __init__(self, portfolio, benchmark):
+    def __init__(self, portfolio, benchmark, proxy=None):
         """Initializest the portfolio by creating and populating the data table
         
         Parameters
@@ -80,8 +80,7 @@ class Portfolio(object):
         self._shrs = portfolio['shares']
         self._freq = frequency
         
-        # proxy if you have a proxy
-        self._proxy = {"http": "http://proxy.jpmchase.net:8443"}
+        self._proxy = proxy
     
         self._bench_wts = benchmark
         
@@ -186,7 +185,6 @@ class Portfolio(object):
         for position in positions:
             returns[position] = self._get_historic_returns(position, periods[position]['start'], periods[position]['end'])
         
-        #return returns
         return pandas.DataFrame(returns)
 
     def get_portfolio_historic_position_values(self, shares=None):
@@ -316,7 +314,7 @@ class Portfolio(object):
             'holding_period_return': holding_period_returns
         })
 
-    def get_expected_stock_returns(self):
+    def get_expected_stock_returns(self, start=None, end=None):
         """
         
         Parameters
@@ -327,6 +325,13 @@ class Portfolio(object):
         
         
         """
+        if start is None:
+            start = holding_periods[position]['start']
+        
+        if end is None:
+            end = holding_periods[position]['end']
+        
+        
         return pandas.DataFrame({
             'expected_returns': self._exp_ret
         })
@@ -367,7 +372,7 @@ class Portfolio(object):
             'expected_excess_returns': expected_returns['expected_returns'] - (bench['bench_weights'] * expected_returns['expected_returns'])
         })
 
-    def get_covariance_matrix(self):
+    def get_covariance_matrix(self, start=None, end=None):
         """
         
         Parameters
@@ -378,12 +383,19 @@ class Portfolio(object):
         
         
         """
+        if start is None:
+            start = holding_periods[position]['start']
+        
+        if end is None:
+            end = holding_periods[position]['end']
+        
+        
         holding_periods = self._hld_per
         positions = holding_periods.keys()
         
         historic_returns = {}
         for position in positions:
-            historic_returns[position] = self._get_historic_returns(position, holding_periods[position]['start'], holding_periods[position]['end'])
+            historic_returns[position] = self._get_historic_returns(position, start, end)
 
         frame = pandas.DataFrame(historic_returns).dropna()
         return pandas.DataFrame(np.cov(frame,  rowvar=0), index=frame.columns, columns=frame.columns)

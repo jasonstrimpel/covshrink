@@ -15,16 +15,16 @@ def get_portfolio_params():
             'goog': 0.15
         },
         'holding_periods': {
-            'gs': {'start': datetime(2009, 8, 1), 'end': datetime(2011, 8, 23)},
-            'c': {'start': datetime(2009, 8, 1), 'end': datetime(2011, 8, 23)},
-            'jpm': {'start': datetime(2009, 8, 1), 'end': datetime(2011, 8, 23)},
-            'tgt': {'start': datetime(2009, 8, 1), 'end': datetime(2011, 8, 23)},
-            'wmt': {'start': datetime(2009, 8, 1), 'end': datetime(2011, 8, 23)},
-            'f': {'start': datetime(2009, 8, 1), 'end': datetime(2011, 8, 23)},
-            'x': {'start': datetime(2009, 8, 1), 'end': datetime(2011, 8, 23)},
-            'ibm': {'start': datetime(2009, 8, 1), 'end': datetime(2011, 8, 23)},
-            'aapl': {'start': datetime(2009, 8, 1), 'end': datetime(2011, 8, 23)},
-            'goog': {'start': datetime(2009, 8, 1), 'end': datetime(2011, 8, 23)}
+            'gs': {'start': datetime(2005, 8, 1), 'end': datetime(2011, 8, 23)},
+            'c': {'start': datetime(2005, 8, 1), 'end': datetime(2011, 8, 23)},
+            'jpm': {'start': datetime(2005, 8, 1), 'end': datetime(2011, 8, 23)},
+            'tgt': {'start': datetime(2005, 8, 1), 'end': datetime(2011, 8, 23)},
+            'wmt': {'start': datetime(2005, 8, 1), 'end': datetime(2011, 8, 23)},
+            'f': {'start': datetime(2005, 8, 1), 'end': datetime(2011, 8, 23)},
+            'x': {'start': datetime(2005, 8, 1), 'end': datetime(2011, 8, 23)},
+            'ibm': {'start': datetime(2005, 8, 1), 'end': datetime(2011, 8, 23)},
+            'aapl': {'start': datetime(2005, 8, 1), 'end': datetime(2011, 8, 23)},
+            'goog': {'start': datetime(2005, 8, 1), 'end': datetime(2011, 8, 23)}
         },
         'shares': {
             'gs': 10,
@@ -44,7 +44,7 @@ def get_portfolio_params():
             'target_gain': 0.03
         },
         'defaults': {
-            'frequency': 'w'
+            'frequency': 'm'
         }
     }
 
