@@ -383,24 +383,25 @@ class Portfolio(object):
         
         
         """
-        if start is None:
-            start = holding_periods[position]['start']
-        
-        if end is None:
-            end = holding_periods[position]['end']
-        
-        
         holding_periods = self._hld_per
         positions = holding_periods.keys()
-        
+
         historic_returns = {}
         for position in positions:
+            
+        
+            if start is None:
+                start = holding_periods[position]['start']
+            
+            if end is None:
+                end = holding_periods[position]['end']
+            
             historic_returns[position] = self._get_historic_returns(position, start, end)
 
         frame = pandas.DataFrame(historic_returns).dropna()
         return pandas.DataFrame(np.cov(frame,  rowvar=0), index=frame.columns, columns=frame.columns)
 
-    def get_shrunk_covariance_matrix(self):
+    def get_shrunk_covariance_matrix(self, x, shrink=None):
         """
         
         Parameters
@@ -411,7 +412,48 @@ class Portfolio(object):
         
         
         """
-        pass
+        
+        if x is None:
+            raise ValueError('No covariance matrix defined')
+        
+        cov = x.as_matrix();
+        
+        [t, n] = np.shape(cov)
+        meanx = cov.mean(axis=0)
+        cov = cov - np.tile(meanx, (t, 1))
+        
+        sample = (1.0 / t) * np.dot(cov.T, cov)
+        
+        var = np.diag(sample)
+        sqrtvar = np.sqrt(var)
+
+        a = np.tile(sqrtvar, (n, 1))
+        b = a * a.T
+        c = (sum(sum(sample / b)) - n)
+        d = (n*(n-1))
+        
+        rho = c / d
+        
+        prior = rho * b
+        prior[np.eye(t, n)==1] = var
+        
+        # Frobenius-norm of matrix cov, sqrt(sum(diag(dot(cov.T, cov))))
+        # have to research this
+        c = np.linalg.norm(cov, 'fro')**2
+        y = cov**2
+        p = np.dot((1 / t), sum(sum(np.dot(y.T, y)))-sum(sum(sample**2.0)))
+        rdiag = np.dot((1/t), (sum(sum(y**2)))-sum(var**2.0))        
+        v = (np.dot((x**3.0).T, x)) / t - (np.tile(var, (n, 1)) * sample)
+        v[np.eye(t, n)==1] = 0.0
+        roff = sum(sum(v * (a.T  / a)))
+        r = rdiag + np.dot(rho, roff)
+        # compute shrinkage constant
+        k = (p - r) / c
+        shrinkage = max(0.0, min(1.0, k/t))
+        sigma = np.dot(shrinkage, prior) + np.dot((1 - shrinkage), sample)
+        
+        return sigma, shrinkage
+
 
     def get_expected_benchmark_return(self):
         """

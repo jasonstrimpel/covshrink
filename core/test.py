@@ -31,10 +31,9 @@ shares = {
     'goog':10
 }
 
-x = op.optimize()
+cov = port.get_covariance_matrix()
 
-
-
+print port.get_shrunk_covariance_matrix(cov)
 
 
 
