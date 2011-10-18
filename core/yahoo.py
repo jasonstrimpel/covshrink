@@ -120,28 +120,12 @@ class Yahoo(object):
         return get[symbol]['EPSEstimateNextQuarter']
 
     def get_DaysLow(self, symbol):
-        
-        ask = self.get_AskRealtime(symbol)
-        
         get = self._data
-        days_low = get[symbol]['DaysLow']
+        return get[symbol]['DaysLow']
         
-        if ask < days_low:
-            return ask
-        else:
-            return days_low
-
     def get_DaysHigh(self, symbol):
-        
-        ask = self.get_AskRealtime(symbol)
-        
         get = self._data
-        days_high = get[symbol]['DaysHigh']
-        
-        if ask > days_high:
-            return ask
-        else:
-            return days_high
+        return get[symbol]['DaysHigh']
 
     def get_YearLow(self, symbol):
         get = self._data

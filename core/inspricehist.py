@@ -47,9 +47,9 @@ class InsertPriceHist(object):
             d2 = (date2[1]-1, date2[2], date2[0])
         else:
             d2 = (date2.month-1, date2.day, date2.year)
-
+        
         if freq != 'd' or freq != 'w' or freq != 'm':
-            freq = 'w'
+            freq = 'm'
 
         urlFmt = 'http://table.finance.yahoo.com/table.csv?a=%d&b=%d&c=%d&d=%d&e=%d&f=%d&s=%s&y=0&g=%s&ignore=.csv'
 
@@ -79,7 +79,7 @@ class InsertPriceHist(object):
 
         return fh
 
-    def insert(self, ticker, start, end, frequency='w'):
+    def insert(self, ticker, start, end, frequency='m'):
         """Inserts frequency price data for ticker from start to end
         
         Parameters

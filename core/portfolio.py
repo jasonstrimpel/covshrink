@@ -112,9 +112,16 @@ class Portfolio(object):
         cols = tuple([n for n in price_data.colnames])
         colnames = cols
 
-        start = time.mktime(time.strptime(start.strftime("%Y-%m-%d"), "%Y-%m-%d"))
-        end = time.mktime(time.strptime(end.strftime("%Y-%m-%d"), "%Y-%m-%d"))
+        if type(start) == str or type(start) == datetime:
+            start = time.mktime(time.strptime(start.strftime("%Y-%m-%d"), "%Y-%m-%d"))
+        else:
+            raise ValueError('Start date must be string(yyyy-mm-dd) or datetime object')
         
+        if type(end) == str or type(end) == datetime:
+            end = time.mktime(time.strptime(end.strftime("%Y-%m-%d"), "%Y-%m-%d"))
+        else:
+            raise ValueError('End date must be string(yyyy-mm-dd) or datetime object')
+
         condition = '(frequency == \'%s\') & (ticker == \'%s\') & (date >= start) & (date <= end)' % (frequency, ticker)
         res = price_data.readWhere(condition)
         
@@ -165,6 +172,20 @@ class Portfolio(object):
         portfolio['price'] = prices
 
         return pandas.DataFrame(portfolio)
+
+    def get_trading_dates(self):
+        """
+        
+        Parameters
+        ----------
+        
+        Returns
+        -------
+        
+        
+        """
+        return self.get_portfolio_historic_returns().index
+        
 
     def get_portfolio_historic_returns(self):
         """
@@ -389,34 +410,47 @@ class Portfolio(object):
         historic_returns = {}
         for position in positions:
             
-        
             if start is None:
                 start = holding_periods[position]['start']
             
             if end is None:
                 end = holding_periods[position]['end']
-            
+
             historic_returns[position] = self._get_historic_returns(position, start, end)
 
         frame = pandas.DataFrame(historic_returns).dropna()
         return pandas.DataFrame(np.cov(frame,  rowvar=0), index=frame.columns, columns=frame.columns)
 
     def get_shrunk_covariance_matrix(self, x, shrink=None):
-        """
+        """Computes a covariance matrix that is "shrunk" towards a structured estimator. Code
+            borrows heavily from the MATLAB implementation available by the authors online.
         
         Parameters
         ----------
+        x : N x N sample covariance matrix of stock returns
+        shrink : given shrinkage intensity factor; if none, code calculates
         
         Returns
         -------
-        
+        tuple : pandas.DataFrame which contains the shrunk covariance matrix
+                : float shrinkage intensity factor
         
         """
-        
         if x is None:
             raise ValueError('No covariance matrix defined')
         
-        cov = x.as_matrix();
+        if type(x) == pandas.core.frame.DataFrame:
+            cov = x.as_matrix()
+        elif type(x) == np.ndarray:
+            cov = x
+        else:
+            raise ValueError('Covariance matrix passed must be numpy.ndarray or pandas.DataFrame')
+        
+        if shrink is not None:
+            shrinkage = shrink
+
+        index = x.index
+        columns = x.columns
         
         [t, n] = np.shape(cov)
         meanx = cov.mean(axis=0)
@@ -428,32 +462,28 @@ class Portfolio(object):
         sqrtvar = np.sqrt(var)
 
         a = np.tile(sqrtvar, (n, 1))
-        b = a * a.T
-        c = (sum(sum(sample / b)) - n)
-        d = (n*(n-1))
+        rho = (sum(sum(sample / (a * a.T))) - n) / (n*(n-1))
         
-        rho = c / d
-        
-        prior = rho * b
+        prior = rho * (a * a.T)
         prior[np.eye(t, n)==1] = var
         
         # Frobenius-norm of matrix cov, sqrt(sum(diag(dot(cov.T, cov))))
         # have to research this
-        c = np.linalg.norm(cov, 'fro')**2
-        y = cov**2
-        p = np.dot((1 / t), sum(sum(np.dot(y.T, y)))-sum(sum(sample**2.0)))
-        rdiag = np.dot((1/t), (sum(sum(y**2)))-sum(var**2.0))        
-        v = (np.dot((x**3.0).T, x)) / t - (np.tile(var, (n, 1)) * sample)
+        c = np.linalg.norm(sample-prior, 'fro')**2
+        y = cov**2.0
+        p = np.dot((1.0 / t), sum(sum(np.dot(y.T, y))))-sum(sum(sample**2.0))
+        rdiag = np.dot((1.0 / t), sum(sum(y**2.0))) - sum(var**2.0)
+        v = np.dot((cov**3.0).T, cov) / t - ((var*sample).T)
         v[np.eye(t, n)==1] = 0.0
-        roff = sum(sum(v * (a.T  / a)))
+        roff = sum(sum(v * (a  / a.T)))
         r = rdiag + np.dot(rho, roff)
+        
         # compute shrinkage constant
         k = (p - r) / c
         shrinkage = max(0.0, min(1.0, k/t))
         sigma = np.dot(shrinkage, prior) + np.dot((1 - shrinkage), sample)
         
-        return sigma, shrinkage
-
+        return pandas.DataFrame(sigma, index=index, columns=columns), shrinkage
 
     def get_expected_benchmark_return(self):
         """
