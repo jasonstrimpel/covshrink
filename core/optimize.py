@@ -15,7 +15,7 @@ import portfolio
 # turn off display of optimizations
 solvers.options['show_progress'] = False
 
-def optimize(pbar=None, S=None):
+def optimize(pbar, S):
     """
     
     Parameters
@@ -35,14 +35,8 @@ def optimize(pbar=None, S=None):
     port = portfolio.Portfolio(port_params, bench_params)
 
     # get the required metrix for the opmization
-    n = port.get_portfolio_size()
+    n = np.shape(S)[0]
     
-    if S is None:
-        S = matrix(port.get_covariance_matrix().as_matrix())
-    
-    if pbar is None:
-        pbar = matrix(port.get_expected_stock_returns().as_matrix())
-
     # n x n matrix of zeros
     G = matrix(0.0, (n,n)) #original
 
