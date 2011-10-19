@@ -361,13 +361,6 @@ class Portfolio(object):
         
         
         """
-        if start is None:
-            start = holding_periods[position]['start']
-        
-        if end is None:
-            end = holding_periods[position]['end']
-        
-        
         return pandas.DataFrame({
             'expected_returns': self._exp_ret
         })
