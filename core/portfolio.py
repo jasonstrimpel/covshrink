@@ -25,7 +25,7 @@ __author__ = 'Jason Strimpel'
 
 class Portfolio(object):
 
-    def __init__(self, portfolio, benchmark, proxy=None):
+    def __init__(self, portfolio, benchmark, start=None, end=None, proxy=None):
         """Initializest the portfolio by creating and populating the data table
         
         Parameters
@@ -72,7 +72,24 @@ class Portfolio(object):
         """
         # do error checking here
         
+        if start is not None:
+            if type(start) == str or type(start) == datetime:
+                start = time.mktime(time.strptime(start.strftime("%Y-%m-%d"), "%Y-%m-%d"))
+            else:
+                raise ValueError('Start date must be string (yyyy-mm-dd) or datetime object')
+        else:
+            start = portfolio['holding_periods']
+        
+        if end is not None:
+            if type(end) == str or type(end) == datetime:
+                end = time.mktime(time.strptime(end.strftime("%Y-%m-%d"), "%Y-%m-%d"))
+            else:
+                raise ValueError('End date must be string (yyyy-mm-dd) or datetime object')
+        else:
+            end = portfolio['holding_periods']
+        
         holding_periods = portfolio['holding_periods']
+        
         frequency = portfolio['defaults']['frequency']
         
         self._exp_ret = portfolio['expected_returns']
@@ -115,12 +132,12 @@ class Portfolio(object):
         if type(start) == str or type(start) == datetime:
             start = time.mktime(time.strptime(start.strftime("%Y-%m-%d"), "%Y-%m-%d"))
         else:
-            raise ValueError('Start date must be string(yyyy-mm-dd) or datetime object')
+            raise ValueError('Start date must be string (yyyy-mm-dd) or datetime object')
         
         if type(end) == str or type(end) == datetime:
             end = time.mktime(time.strptime(end.strftime("%Y-%m-%d"), "%Y-%m-%d"))
         else:
-            raise ValueError('End date must be string(yyyy-mm-dd) or datetime object')
+            raise ValueError('End date must be string (yyyy-mm-dd) or datetime object')
 
         condition = '(frequency == \'%s\') & (ticker == \'%s\') & (date >= start) & (date <= end)' % (frequency, ticker)
         res = price_data.readWhere(condition)
@@ -208,7 +225,7 @@ class Portfolio(object):
         
         return pandas.DataFrame(returns)
 
-    def get_portfolio_historic_position_values(self, shares=None):
+    def get_portfolio_historic_position_values(self, start=None, end=None, shares=1):
         """
         
         Parameters
@@ -219,12 +236,10 @@ class Portfolio(object):
         
         
         """
-        if shares is None:
-            shares = self._shrs
-        
+        shares = self._shrs
         positions = shares.keys()
         periods = self._hld_per 
-        
+
         prices = {}; portfolio = {}
         for position in positions:
             frame = self._get_historic_data(position, periods[position]['start'], periods[position]['end'])
@@ -393,7 +408,7 @@ class Portfolio(object):
             'expected_excess_returns': expected_returns['expected_returns'] - (bench['bench_weights'] * expected_returns['expected_returns'])
         })
 
-    def get_covariance_matrix(self, start=None, end=None):
+    def get_covariance_matrix(self, historic_returns, start=None, end=None):
         """
         
         Parameters
@@ -404,6 +419,7 @@ class Portfolio(object):
         
         
         """
+        '''
         holding_periods = self._hld_per
         positions = holding_periods.keys()
 
@@ -417,7 +433,7 @@ class Portfolio(object):
                 end = holding_periods[position]['end']
 
             historic_returns[position] = self._get_historic_returns(position, start, end)
-
+        '''
         frame = pandas.DataFrame(historic_returns).dropna()
         return pandas.DataFrame(np.cov(frame,  rowvar=0), index=frame.columns, columns=frame.columns)
 
