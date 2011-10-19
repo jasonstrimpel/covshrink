@@ -19,7 +19,7 @@ class InsertPriceHist(object):
     def __init__(self, proxy=None):
         self._proxy = proxy
 
-    def _fetch_historical_yahoo(self, ticker, date1, date2, freq, cachename=None):
+    def _fetch_historical_yahoo(self, ticker, date1, date2, freq=None, cachename=None):
         """matplotlib's implementation, modified to provide proxy support and frequency
         Fetch historical data for ticker between date1 and date2.  date1 and
         date2 are date or datetime instances, or (year, month, day) sequences.
@@ -33,6 +33,9 @@ class InsertPriceHist(object):
 
         a file handle is returned
         """
+        if freq is None or type(freq) != str:
+            raise ValueError('Must enter a frequency as a string, m, w, or d')
+
         proxy = self._proxy
         ticker = ticker.upper()
         
@@ -47,9 +50,6 @@ class InsertPriceHist(object):
             d2 = (date2[1]-1, date2[2], date2[0])
         else:
             d2 = (date2.month-1, date2.day, date2.year)
-        
-        if freq != 'd' or freq != 'w' or freq != 'm':
-            freq = 'm'
 
         urlFmt = 'http://table.finance.yahoo.com/table.csv?a=%d&b=%d&c=%d&d=%d&e=%d&f=%d&s=%s&y=0&g=%s&ignore=.csv'
 
@@ -79,7 +79,7 @@ class InsertPriceHist(object):
 
         return fh
 
-    def insert(self, ticker, start, end, frequency='m'):
+    def insert(self, ticker, start, end, frequency):
         """Inserts frequency price data for ticker from start to end
         
         Parameters
