@@ -7,7 +7,16 @@ import pandas
 
 from datetime import datetime
 from datetime import date
+from dateutil import relativedelta
 import time
+
+def jump_by_month(start_date, end_date, month_step=1): 
+    current_date = start_date 
+    while current_date < end_date: 
+        yield current_date 
+        carry, new_month = divmod(current_date.month - 1 + month_step, 12)
+        new_month += 1 
+        current_date = current_date.replace(year=current_date.year + carry, month=new_month) 
 
 # get the portfolio parameters
 port_params = params.get_portfolio_params();
@@ -17,13 +26,16 @@ bench_params = params.get_bench_params();
 proxy = {"http": "http://proxy.jpmchase.net:8443"}
 port = portfolio.Portfolio(port_params, bench_params, proxy=proxy)
 
-rollperiod = 60
+roll = 36
+rollperiod = relativedelta.relativedelta(months=roll)
 
-start = datetime(2005, 8, 1)
-end = datetime(2011, 8, 23)
+#start = datetime(2005, 8, 1) + rollperiod
 
-cov = port.get_covariance_matrix()
-(sigma, shrinkage) = port.get_shrunk_covariance_matrix(cov)
+start = datetime(1990, 1, 1)
+end = datetime(2000, 1, 1)
+
+#cov = port.get_covariance_matrix()
+#(sigma, shrinkage) = port.get_shrunk_covariance_matrix(cov)
 
 dates = port.get_trading_dates()
 portvalue = port.get_portfolio_historic_position_values()
@@ -32,11 +44,20 @@ bench = port.get_benchmark_weights().T
 N = len(dates)
 
 bench = pandas.DataFrame(np.tile(bench, (N, 1)), index=dates, columns=bench.columns)
+returns = port.get_portfolio_historic_returns()
 
-for d in dates:
-    positions = portvalue.ix[d:d]
-    total = portvalue.ix[d:d].sum(axis=1)
+for i in range(len(dates)-roll):
+
+    start = dates[i]
+    end = dates[i]+rollperiod
+
+    positions = portvalue.ix[start:end]
+
+    total = portvalue.ix[start:end].sum(axis=1)
     port_weight = positions / total
-    active_weights = port_weight - bench.ix[d:d]
-    
+    active_weights = port_weight - bench.ix[start:end]
+    active_returns = returns.ix[start:end] * active_weights
+
+    cov = port.get_covariance_matrix(active_returns)   
+    sigma, shrinkage = port.get_shrunk_covariance_matrix(cov)
     
