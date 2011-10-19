@@ -1,14 +1,17 @@
+# standard modules
+from datetime import datetime
+from datetime import date
+from dateutil import relativedelta
+import time
+
 # custom modules
 import params
 import portfolio
 import optimize as op
 import numpy as np
 import pandas
+from cvxopt import matrix
 
-from datetime import datetime
-from datetime import date
-from dateutil import relativedelta
-import time
 
 def jump_by_month(start_date, end_date, month_step=1): 
     current_date = start_date 
@@ -49,15 +52,23 @@ returns = port.get_portfolio_historic_returns()
 for i in range(len(dates)-roll):
 
     start = dates[i]
-    end = dates[i]+rollperiod
+    end = dates[i] + rollperiod
 
     positions = portvalue.ix[start:end]
 
     total = portvalue.ix[start:end].sum(axis=1)
     port_weight = positions / total
+
     active_weights = port_weight - bench.ix[start:end]
     active_returns = returns.ix[start:end] * active_weights
 
-    cov = port.get_covariance_matrix(active_returns)   
+    cov = port.get_covariance_matrix(active_returns)
     sigma, shrinkage = port.get_shrunk_covariance_matrix(cov)
+    
+    pbar = matrix(port.get_expected_excess_portfolio_return().as_matrix())
+    S = matrix(cov.as_matrix())
+    
+    op_weights = op.optimize(pbar, S)
+    
+    print [i for i in op_weights]
     
