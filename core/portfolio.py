@@ -1,4 +1,5 @@
 # standard modules
+from math import sqrt
 from datetime import datetime
 import time
 
@@ -78,7 +79,7 @@ class Portfolio(object):
             else:
                 raise ValueError('Start date must be string (yyyy-mm-dd) or datetime object')
         else:
-            start = portfolio['holding_periods']
+            start = portfolio['defaults']['start']
         
         if end is not None:
             if type(end) == str or type(end) == datetime:
@@ -86,7 +87,7 @@ class Portfolio(object):
             else:
                 raise ValueError('End date must be string (yyyy-mm-dd) or datetime object')
         else:
-            end = portfolio['holding_periods']
+            start = portfolio['defaults']['end']
         
         holding_periods = portfolio['holding_periods']
         
@@ -96,6 +97,8 @@ class Portfolio(object):
         self._hld_per = holding_periods
         self._shrs = portfolio['shares']
         self._freq = frequency
+        self._start = start
+        self._end = end
         
         self._proxy = proxy
     
@@ -616,3 +619,28 @@ class Portfolio(object):
         holding_periods = self._hld_per
         positions = holding_periods.keys()
         return len(positions)
+    
+    def information_ratio(self, returns, freq='m'):
+        """
+        
+        Parameters
+        ----------
+        
+        Returns
+        -------
+        
+        
+        """
+        if freq == 'y':
+            f = 1
+        elif freq == 'm':
+            f = 12
+        elif freq == 'w':
+            f = 52
+        elif freq == 'd':
+            f = 252
+        
+        mean = returns.mean()
+        stdev = returns.std()
+        
+        return (sqrt(f) * mean) / stdev

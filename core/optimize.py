@@ -15,7 +15,7 @@ import portfolio
 # turn off display of optimizations
 solvers.options['show_progress'] = False
 
-def optimize(pbar, S):
+def optimize(a, S):
     """
     
     Parameters
@@ -26,14 +26,6 @@ def optimize(pbar, S):
     
     
     """
-
-    # get the portfolio parameters
-    port_params = params.get_portfolio_params();
-    bench_params = params.get_bench_params();
-
-    # instantiate the porfolio object
-    port = portfolio.Portfolio(port_params, bench_params)
-
     # get the required metrix for the opmization
     n = np.shape(S)[0]
     
@@ -57,12 +49,16 @@ def optimize(pbar, S):
     # Compute trade-off.
     N = 1
 
-    mus = [ 10**(5.0*t/N-1.0) for t in xrange(N) ]
+    t = N
+
+    #mus = [ 10**(5.0*t/N-1.0) for t in xrange(N) ]
+    mu = 10**(5.0*t/N-1.0)
 
     # optimal portfolios for given mus
-    portfolios = [ qp(mu*S, -pbar, G, h, A, b)['x'] for mu in mus ]
+    #portfolios = [ qp(mu*S, -pbar, G, h, A, b)['x'] for mu in mus ]
+    portfolios = qp(mu*S, -a, G, h, A, b)['x']
 
-    returns = [ dot(pbar,x) for x in portfolios ]
-    risks = [ sqrt(dot(x, S*x)) for x in portfolios ]
+    #returns = [ dot(pbar,x) for x in portfolios ]
+    #risks = [ sqrt(dot(x, S*x)) for x in portfolios ]
     
     return portfolios

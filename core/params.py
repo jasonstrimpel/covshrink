@@ -1,44 +1,44 @@
 from datetime import datetime
+from datetime import date
+from dateutil import relativedelta
 import numpy as np
 
-ran = np.random.randn(30, 1) / 10
-
-start = datetime(1990, 1, 1)
-end = datetime(2000, 1, 1)
+start = datetime(1990, 2, 1)
+end = datetime(2010, 12, 31)
 
 def get_portfolio_params():
     return {
         'expected_returns': {
-            'AA': ran[0][0],
-            'AAPL': ran[1][0],
-            'AXP': ran[2][0],
-            'BA': ran[3][0],
-            'BAC': ran[4][0],
-            'BP': ran[5][0],
-            'CAT': ran[6][0],
-            'CVX': ran[7][0],
-            'DD': ran[8][0],
-            'DIS': ran[9][0],
-            'GE': ran[10][0],
-            'HD': ran[11][0],
-            'HPQ': ran[12][0],
-            'IBM': ran[13][0],
-            'INTC': ran[14][0],
-            'JNJ': ran[15][0],
-            'JPM': ran[16][0],
-            'KO': ran[17][0],
-            'MCD': ran[18][0],
-            'MMM': ran[19][0],
-            'MRK': ran[20][0],
-            'MSFT': ran[21][0],
-            'PFE': ran[22][0],
-            'PG': ran[23][0],
-            'T': ran[24][0],
-            'TRV': ran[25][0],
-            'UTX': ran[26][0],
-            'VZ': ran[27][0],
-            'WMT': ran[28][0],
-            'XOM': ran[29][0]
+            'AA': 0.03,
+            'AAPL': 0.03,
+            'AXP': 0.03,
+            'BA': 0.03,
+            'BAC': 0.03,
+            'BP': 0.03,
+            'CAT': 0.03,
+            'CVX': 0.03,
+            'DD': 0.03,
+            'DIS': 0.03,
+            'GE': 0.03,
+            'HD': 0.03,
+            'HPQ': 0.03,
+            'IBM': 0.03,
+            'INTC': 0.03,
+            'JNJ': 0.03,
+            'JPM': 0.03,
+            'KO': 0.03,
+            'MCD': 0.03,
+            'MMM': 0.03,
+            'MRK': 0.03,
+            'MSFT': 0.03,
+            'PFE': 0.03,
+            'PG': 0.03,
+            'T': 0.03,
+            'TGT': 0.03,
+            'UTX': 0.03,
+            'VZ': 0.03,
+            'WMT': 0.03,
+            'XOM': 0.03
         },
         'holding_periods': {
             'AA': {'start': start, 'end': end},
@@ -66,7 +66,7 @@ def get_portfolio_params():
             'PFE': {'start': start, 'end': end},
             'PG': {'start': start, 'end': end},
             'T': {'start': start, 'end': end},
-            'TRV': {'start': start, 'end': end},
+            'TGT': {'start': start, 'end': end},
             'UTX': {'start': start, 'end': end},
             'VZ': {'start': start, 'end': end},
             'WMT': {'start': start, 'end': end},
@@ -98,7 +98,7 @@ def get_portfolio_params():
             'PFE': 10,
             'PG': 10,
             'T': 10,
-            'TRV': 10,
+            'TGT': 10,
             'UTX': 10,
             'VZ': 10,
             'WMT': 10,
@@ -110,7 +110,9 @@ def get_portfolio_params():
             'target_gain': 0.03
         },
         'defaults': {
-            'frequency': 'm'
+            'frequency': 'm',
+            'start': start,
+            'end': end
         }
     }
 
@@ -142,7 +144,7 @@ def get_bench_params():
         'PFE': 0.038134386826076,
         'PG': 0.0461872886762692,
         'T': 0.044784525128171,
-        'TRV': 0.00590875178982238,
+        'TGT': 0.00590875178982238,
         'UTX': 0.0172864630200356,
         'VZ': 0.027249980776944,
         'WMT': 0.0503696022178211,
