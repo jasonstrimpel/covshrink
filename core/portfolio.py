@@ -75,7 +75,7 @@ class Portfolio(object):
         else:
             start = portfolio['defaults']['end']
         
-        # holding_periods = portfolio['holding_periods']
+        holding_periods = portfolio['holding_periods']
         frequency = portfolio['defaults']['frequency']
         
         self._exp_ret = portfolio['expected_returns']
@@ -97,7 +97,7 @@ class Portfolio(object):
         
         # load the data into the data table
         for symbol in holding_periods.keys():
-            phobj.insert(symbol, start, start, frequency)
+            phobj.insert(symbol, holding_periods[symbol]['start'], holding_periods[symbol]['end'], frequency)
 
     def _get_historic_data(self, ticker, start, end):
         """Translates the data stored in the pytables table containing the price data to a pandas.DataFrame
@@ -212,7 +212,9 @@ class Portfolio(object):
         pandas.DataFrame : pandas.DataFrame containing the values of the portfolio constituents
         
         """
-        shares = self._shrs
+        if shares is None:
+            shares = self._shrs
+        
         positions = shares.keys()
         periods = self._hld_per 
 
@@ -260,11 +262,45 @@ class Portfolio(object):
         pandas.DataFrame : pandas.DataFrame containing the weights of the benchmark constituents
         
         """
-        return pandas.DataFrame({
-            'bench_weights': self._bench_wts
-        })
+        shares = {
+            'AA': 1,
+            'AAPL': 1,
+            'AXP': 1,
+            'BA': 1,
+            'BAC': 1,
+            'BP': 1,
+            'CAT': 1,
+            'CVX': 1,
+            'DD': 1,
+            'DIS': 1,
+            'GE': 1,
+            'HD': 1,
+            'HPQ': 1,
+            'IBM': 1,
+            'INTC': 1,
+            'JNJ': 1,
+            'JPM': 1,
+            'KO': 1,
+            'MCD': 1,
+            'MMM': 1,
+            'MRK': 1,
+            'MSFT': 1,
+            'PFE': 1,
+            'PG': 1,
+            'T': 1,
+            'TGT': 1,
+            'UTX': 1,
+            'VZ': 1,
+            'WMT': 1,
+            'XOM': 1
+        }
+        portvalue = self.get_portfolio_historic_position_values(shares)
+        total = portvalue.sum(axis=1)
+        
+        bench_weight = portvalue / total
+
+        return bench_weight
     
-    '''
     def get_active_weights(self):
         """
         
@@ -279,12 +315,15 @@ class Portfolio(object):
         portfolio = self.get_portfolio_weights()
         bench = self.get_benchmark_weights()
         
+        return portfolio - bench
+        
+        '''
         return pandas.DataFrame({
-            'active_weights': portfolio['port_weights'] - bench['bench_weights']
+            'active_weights': portfolio['port_weights'] - bench
         })
-    '''
+        '''
     
-    def get_portfolio_weights(self):
+    def get_portfolio_weights(self, shares=None):
         """Computes the weights of the portfolio constituents including share holdings
 
         Returns
@@ -293,15 +332,13 @@ class Portfolio(object):
             constituents
         
         """
-        shares = self._shrs
-        portfolio = self._build_portfolio(shares)
+        if shares is None:
+            shares = self._shrs
         
-        mkt_val = portfolio['shares'] * portfolio['price']
-        portfolio_val = mkt_val.sum()
+        portvalue = self.get_portfolio_historic_position_values().dropna()
+        port_weight = portvalue / portvalue.sum(axis=1)
         
-        return pandas.DataFrame({
-            'port_weights': mkt_val / portfolio_val
-        })
+        return port_weight
     
     '''
     def get_holding_period_returns(self):
@@ -341,7 +378,7 @@ class Portfolio(object):
         return pandas.DataFrame({
             'expected_returns': self._exp_ret
         })
-    '''
+    
     def get_active_returns(self):
         """Computes the active returns on the portfolio constituents
         
@@ -352,12 +389,11 @@ class Portfolio(object):
         
         """
         active_weights = self.get_active_weights()
-        holding_period_returns = self.get_holding_period_returns()
-        
-        return pandas.DataFrame({
-            'active_return': active_weights['active_weights'] * holding_period_returns['holding_period_return']
-        })
-    '''
+        returns = self.get_portfolio_historic_returns()
+
+        return active_weights * returns
+
+    
     def get_expected_excess_stock_returns(self):
         """Computes the expected excess stock returns
             The authors build the expected excess returns by adding random noise to the realized excess returns, 
@@ -390,7 +426,7 @@ class Portfolio(object):
         total = portvalue.sum(axis=1)
         port_weights = portvalue / total
         
-        excess_returns = self.get_portfolio_historic_returns() * (port_weights - bench_weights['bench_weights'])
+        excess_returns = self.get_portfolio_historic_returns() * (port_weights - bench_weights)
         
         # one period lognormal model for noise
         # assumes ln(S / S_0) = m + s * randn
@@ -609,7 +645,6 @@ class Portfolio(object):
         positions = holding_periods.keys()
         return len(positions)
     
-
     def get_trading_dates(self):
         """Returns the dates included for which there are historic returns
         
