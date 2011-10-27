@@ -29,30 +29,4 @@ bench_params = params.get_bench_params()
 # instantiate the porfolio object
 port = portfolio.Portfolio(port_params, bench_params, proxy={"http": "http://proxy.jpmchase.net:8443"})
 
-start = datetime(1990,11,01)
-
-a, b = port.get_expected_excess_stock_returns()
-b = b.ix[start:start]
-
-
-aa = a.as_matrix()
-bb = np.require(b.transpose().as_matrix(), dtype=np.float64, requirements=['F'])
-
-print 'aa'
-#print aa.dtype
-#print aa.flags
-#print np.shape(aa)
-#print type(aa)
-print matrix(aa)
-
-print
-print
-print
-
-
-print 'bb'
-#print bb.dtype
-#print bb.flags
-#print np.shape(bb)
-#print type(bb)
-print matrix(bb)
+print port.estimate_parameters()

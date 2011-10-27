@@ -2,6 +2,7 @@
 from datetime import datetime
 from datetime import date
 from dateutil import relativedelta
+import math
 import time
 
 # custom modules
@@ -72,7 +73,8 @@ def eval():
         active_returns = returns.ix[start:end] * active_weights
         
         # compute the sample covariance matrix, cov
-        cov = port.get_covariance_matrix(returns.ix[start:end])
+        #cov = port.get_covariance_matrix(returns.ix[start:end])
+        cov = port.get_covariance_matrix(active_returns)
         # compute the shrunk covariance matrix, sigma
         sigma, shrinkage = port.get_shrunk_covariance_matrix(cov)
         
@@ -108,11 +110,14 @@ def eval():
         'stdev_excess_return': np.array([e]).mean()
     }
 
-runs = 1
+s = time.time()
+
+runs = 50.0
 ir = []
 for i in xrange(runs):
     res = eval()
     ir.append(res['information_ratio'])
-    print i
+    print 'run #',i+1,'of',runs,'(',round(((i+1.0)/runs),2)*100.0,'% complete)'
 
-print sum(ir) / runs
+print 'mean ir = ', sum(ir) / runs, 'computed in', round(time.time()-s, 2), 'seconds'
+

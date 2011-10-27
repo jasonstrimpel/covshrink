@@ -4,7 +4,7 @@ from dateutil import relativedelta
 import numpy as np
 
 start = datetime(1990, 2, 1)
-end = datetime(2010, 12, 31)
+end = datetime(2005, 12, 31)
 
 def get_portfolio_params():
     return {
