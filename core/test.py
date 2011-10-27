@@ -29,4 +29,18 @@ bench_params = params.get_bench_params()
 # instantiate the porfolio object
 port = portfolio.Portfolio(port_params, bench_params, proxy={"http": "http://proxy.jpmchase.net:8443"})
 
-print port.estimate_parameters()
+bench = port.get_benchmark_weights().ix[datetime(1990,02,01)]
+print
+print
+print
+portvalue = port.get_portfolio_historic_position_values().dropna()
+port_weight = portvalue / portvalue.sum(axis=1)
+
+p = port_weight.ix[datetime(1990,02,01)]
+
+#print p - bench
+
+active = port.get_active_returns()
+print 
+print 
+print active.ix[datetime(1990,03,01)]
