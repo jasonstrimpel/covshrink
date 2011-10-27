@@ -23,7 +23,7 @@ def jump_by_month(start_date, end_date, month_step=1):
         current_date = current_date.replace(year=current_date.year + carry, month=new_month) 
 '''
 
-def eval():
+def eval(type):
 
     # get the portfolio parameters
     port_params = params.get_portfolio_params()
@@ -38,7 +38,7 @@ def eval():
     outsample = 60
     outsampleperiod = relativedelta.relativedelta(months=outsample)
 
-    # 
+    # setup 
     dates = port.get_trading_dates()
     start = dates[0] + rollperiod
     end = dates[-1]
@@ -46,11 +46,11 @@ def eval():
     delta = relativedelta.relativedelta(end, start)
     periods = (delta.years * 12) + delta.months
 
-    portvalue = port.get_portfolio_historic_position_values().dropna()
-    bench = port.get_benchmark_weights().T
-
-    bench = pandas.DataFrame(np.tile(bench, (len(dates), 1)), index=dates, columns=bench.columns)
-    returns = port.get_portfolio_historic_returns()
+    portvalue = port.get_portfolio_historic_position_values()
+    
+    # constant benchmark weights
+    #returns = port.get_portfolio_historic_returns()
+    active = port.get_active_returns()
 
     expected_excess_returns = port.get_expected_excess_stock_returns()
 
@@ -61,7 +61,7 @@ def eval():
         # setup the dates to calculate returns for the covariance matrixes
         start = dates[i-roll]
         end = dates[i]
-        
+        '''
         #dataframe of positions over the roll period
         positions = portvalue.ix[start:end]
         
@@ -71,12 +71,13 @@ def eval():
         
         active_weights = port_weight - bench.ix[start:end]
         active_returns = returns.ix[start:end] * active_weights
+        '''
+        active_returns = active.ix[start:end]
         
-        # compute the sample covariance matrix, cov
-        #cov = port.get_covariance_matrix(returns.ix[start:end])
+        # compute the sample covariance matrix, cov of active returns
         cov = port.get_covariance_matrix(active_returns)
-        # compute the shrunk covariance matrix, sigma
-        sigma, shrinkage = port.get_shrunk_covariance_matrix(cov)
+        # should it be absolute returns?
+        #cov = port.get_covariance_matrix(returns.ix[start:end])
         
         # actual realized returns
         y = ((portvalue.ix[end:end].as_matrix() / portvalue.ix[dates[i-1]:dates[i-1]].as_matrix()) - 1)[0]
@@ -88,36 +89,53 @@ def eval():
         a0 = np.require(expected_excess_returns.ix[end:end].transpose().as_matrix(), dtype=np.float64, requirements=['F'])
         a = matrix(a0)
         
-        #S = matrix(sigma.as_matrix())
-        S = matrix(cov.as_matrix())
+        if type == 'sample':
+            S = matrix(cov.as_matrix())
+        elif type == 'shrunk':
+            # compute the shrunk covariance matrix, sigma
+            sigma, shrinkage = port.get_shrunk_covariance_matrix(cov)
+            S = matrix(sigma.as_matrix())
+        else:
+            raise ValueError('Type must be either of the two strings: sample or shrunk')
         
+        # get the optimized weights
+        # this is horribly naive because i'm only including the constaints provided in the example
+        # i spent a considerable amount of time looking at the documentation, forums, and source
+        # code trying to become comfortable with the package to no avail
         x = op.optimize(a, S)
         
+        # optimized expected excess portfolio returns
         e_ = (x.T * y).sum()
-        
+
         e.append(e_)
 
-        '''
-        print
-        print 'i=',i,'date=',dates[i]
-        print 'port return=',e_
-        print '~*~*~*~*~*~*~*~'
-        '''
-        
     return {
         'information_ratio': port.information_ratio(np.array([e])),
         'mean_excess_return': np.array([e]).std(),
         'stdev_excess_return': np.array([e]).mean()
     }
 
-s = time.time()
 
-runs = 50.0
-ir = []
-for i in xrange(runs):
-    res = eval()
-    ir.append(res['information_ratio'])
-    print 'run #',i+1,'of',runs,'(',round(((i+1.0)/runs),2)*100.0,'% complete)'
 
-print 'mean ir = ', sum(ir) / runs, 'computed in', round(time.time()-s, 2), 'seconds'
+runs = 50
+types = ['sample', 'shrunk']
 
+for type in types:
+    
+    ir = []; me = []; se = []; 
+    s = time.time()
+
+    for i in xrange(runs):
+        res = eval(type)
+        ir.append(res['information_ratio'])
+        me.append(res['mean_excess_return'])
+        se.append(res['stdev_excess_return'])
+        
+        print 'run #',i+1,'of',runs,'(',round(((i+1.0)/runs),2)*100.0,'% complete)'
+    
+    print 'type:', type
+    print 'mean ir = ', sum(ir) / runs
+    print 'mean expected returns = ', sum(me) / runs
+    print 'stdev expected returns = ', sum(se) / runs
+    print 'computed in', round((time.time()-s)/60.0, 2), 'minutes'
+    print
