@@ -27,7 +27,7 @@ __author__ = 'Jason Strimpel'
 
 class Portfolio(object):
 
-    def __init__(self, portfolio, benchmark, start=None, end=None, proxy=None):
+    def __init__(self, portfolio, start=None, end=None, proxy=None):
         """Initializest the portfolio by creating and populating the data table. Goes out to Yahoo and gets historic 
             data using a Matplotlib method modified to accept a proxy and frequency of data
         
@@ -87,8 +87,6 @@ class Portfolio(object):
         
         # for those of use behind a proxy
         self._proxy = proxy
-        # benchmark weights
-        self._bench_wts = benchmark
         
         # build the table for the data
         createdailytable.reset_table()
@@ -316,12 +314,6 @@ class Portfolio(object):
         bench = self.get_benchmark_weights()
         
         return portfolio - bench
-        
-        '''
-        return pandas.DataFrame({
-            'active_weights': portfolio['port_weights'] - bench
-        })
-        '''
     
     def get_portfolio_weights(self, shares=None):
         """Computes the weights of the portfolio constituents including share holdings
