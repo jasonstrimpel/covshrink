@@ -13,24 +13,22 @@ import numpy as np
 import pandas
 from cvxopt import matrix
 
-'''
-def jump_by_month(start_date, end_date, month_step=1): 
-    current_date = start_date 
-    while current_date < end_date: 
-        yield current_date 
-        carry, new_month = divmod(current_date.month - 1 + month_step, 12)
-        new_month += 1 
-        current_date = current_date.replace(year=current_date.year + carry, month=new_month) 
-'''
-
 def eval(type):
-
+    """
+    
+    Parameters
+    ----------
+    
+    Returns
+    -------
+    
+    
+    """
     # get the portfolio parameters
     port_params = params.get_portfolio_params()
-    bench_params = params.get_bench_params()
 
     # instantiate the porfolio object
-    port = portfolio.Portfolio(port_params, bench_params, proxy={"http": "http://proxy.jpmchase.net:8443"})
+    port = portfolio.Portfolio(port_params, proxy={"http": "http://proxy.jpmchase.net:8443"})
 
     # setup the periodicity
     roll = 60
@@ -61,23 +59,11 @@ def eval(type):
         # setup the dates to calculate returns for the covariance matrixes
         start = dates[i-roll]
         end = dates[i]
-        '''
-        #dataframe of positions over the roll period
-        positions = portvalue.ix[start:end]
-        
-        # portfolio weights 
-        total = portvalue.ix[start:end].sum(axis=1)
-        port_weight = positions / total
-        
-        active_weights = port_weight - bench.ix[start:end]
-        active_returns = returns.ix[start:end] * active_weights
-        '''
+
         active_returns = active.ix[start:end]
         
         # compute the sample covariance matrix, cov of active returns
         cov = port.get_covariance_matrix(active_returns)
-        # should it be absolute returns?
-        #cov = port.get_covariance_matrix(returns.ix[start:end])
         
         # actual realized returns
         y = ((portvalue.ix[end:end].as_matrix() / portvalue.ix[dates[i-1]:dates[i-1]].as_matrix()) - 1)[0]
@@ -135,7 +121,8 @@ for type in types:
     
     print 'type:', type
     print 'mean ir = ', sum(ir) / runs
+    
     print 'mean expected returns = ', sum(me) / runs
     print 'stdev expected returns = ', sum(se) / runs
     print 'computed in', round((time.time()-s)/60.0, 2), 'minutes'
-    print
+    
