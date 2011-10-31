@@ -24,11 +24,14 @@ def jump_by_month(start_date, end_date, month_step=1):
 
 # get the portfolio parameters
 port_params = params.get_portfolio_params()
-bench_params = params.get_bench_params()
 
 # instantiate the porfolio object
-port = portfolio.Portfolio(port_params, bench_params, proxy={"http": "http://proxy.jpmchase.net:8443"})
+port = portfolio.Portfolio(port_params, proxy={"http": "http://proxy.jpmchase.net:8443"})
 
+
+
+
+'''
 bench = port.get_benchmark_weights().ix[datetime(1990,02,01)]
 print
 print
@@ -44,3 +47,4 @@ active = port.get_active_returns()
 print 
 print 
 print active.ix[datetime(1990,03,01)]
+'''
