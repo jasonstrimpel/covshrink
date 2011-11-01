@@ -6,7 +6,7 @@ import numpy as np
 start = datetime(1990, 2, 1)
 end = datetime(2005, 12, 31)
 
-def get_portfolio_params():
+def get_portfolio_params(index=30):
     return {
         'expected_returns': {
             'AA': 0.03,
