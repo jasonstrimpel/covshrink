@@ -97,34 +97,49 @@ def eval(type, index=30):
 
     return {
         'information_ratio': port.information_ratio(np.array([e])),
-        'mean_excess_return': np.array([e]).std(),
-        'stdev_excess_return': np.array([e]).mean()
+        'mean_excess_return': np.array([e]).mean(),
+        'stdev_excess_return': np.array([e]).std()
     }
 
-runs = 1
-types = ['sample', 'shrunk']
-N = [15, 30, 50, 75, 100]
+runs = 10
+N = [30, 50, 100]
+
+start = time.time()
 
 for n in N:
-    
-    for type in types:
-        
-        ir = []; me = []; se = []; 
-        s = time.time()
 
-        for i in xrange(runs):
-            res = eval(type, index=n)
-            ir.append(res['information_ratio'])
-            me.append(res['mean_excess_return'])
-            se.append(res['stdev_excess_return'])
-            
-            print 'run #',i+1,'of',runs,'(',round(((i+1.0)/runs),2)*100.0,'% complete)'
-        
-        print 'type:', type
-        print 'N=', n
-        print 'mean ir = ', sum(ir) / runs
-        
-        print 'mean expected returns = ', sum(me) / runs
-        print 'stdev expected returns = ', sum(se) / runs
-        print 'computed in', round((time.time()-s)/60.0, 2), 'minutes'
+    ir_sh = []; me_sh = []; se_sh = []; 
+    ir_sa = []; me_sa = []; se_sa = []; 
+    s = time.time()
     
+    for i in xrange(runs):
+        res = eval('sample', index=n)
+        ir_sa.append(res['information_ratio'])
+        me_sa.append(res['mean_excess_return'])
+        se_sa.append(res['stdev_excess_return'])
+        
+        res = eval('shrunk', index=n)
+        ir_sh.append(res['information_ratio'])
+        me_sh.append(res['mean_excess_return'])
+        se_sh.append(res['stdev_excess_return'])
+        
+        #print 'run #',i+1,'of',runs,'(',round(((i+1.0)/runs),2)*100.0,'% complete)'
+    
+    # sample cov matrix stats
+    ir_sa = sum(ir_sa) / runs
+    mer_sa = sum(me_sa) / runs
+    msd_sa = sum(se_sa) / runs
+
+    # shrunk cov matrix stats
+    ir_sh = sum(ir_sh) / runs
+    mer_sh = sum(me_sh) / runs
+    msd_sh = sum(se_sh) / runs
+    
+    print '\t\tIR\t\tMean\tSD'
+    print 'Sample\t%.4f\t%.4f\t%.4f\t' % (ir_sa, mer_sa, msd_sa)
+    print 'Shrink\t%.4f\t%.4f\t%.4f\t' % (ir_sh, mer_sh, msd_sh)
+    print 'computed in', round(time.time()-s, 2), 'seconds'
+    print 'N=%.0f\tRuns=%.0f' % (n, runs)
+    print
+
+print 'total run', round((time.time()-start)/60.0, 2), 'minutes'
