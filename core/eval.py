@@ -6,14 +6,14 @@ import math
 import time
 
 # custom modules
-import params
+import params2
 import portfolio
 import optimize as op
 import numpy as np
 import pandas
 from cvxopt import matrix
 
-def eval(type):
+def eval(type, index=30):
     """
     
     Parameters
@@ -25,7 +25,7 @@ def eval(type):
     
     """
     # get the portfolio parameters
-    port_params = params.get_portfolio_params()
+    port_params = params2.get_portfolio_params(index=index)
 
     # instantiate the porfolio object
     port = portfolio.Portfolio(port_params, proxy={"http": "http://proxy.jpmchase.net:8443"})
@@ -101,28 +101,30 @@ def eval(type):
         'stdev_excess_return': np.array([e]).mean()
     }
 
-
-
-runs = 50
+runs = 1
 types = ['sample', 'shrunk']
+N = [15, 30, 50, 75, 100]
 
-for type in types:
+for n in N:
     
-    ir = []; me = []; se = []; 
-    s = time.time()
-
-    for i in xrange(runs):
-        res = eval(type)
-        ir.append(res['information_ratio'])
-        me.append(res['mean_excess_return'])
-        se.append(res['stdev_excess_return'])
+    for type in types:
         
-        print 'run #',i+1,'of',runs,'(',round(((i+1.0)/runs),2)*100.0,'% complete)'
-    
-    print 'type:', type
-    print 'mean ir = ', sum(ir) / runs
-    
-    print 'mean expected returns = ', sum(me) / runs
-    print 'stdev expected returns = ', sum(se) / runs
-    print 'computed in', round((time.time()-s)/60.0, 2), 'minutes'
+        ir = []; me = []; se = []; 
+        s = time.time()
+
+        for i in xrange(runs):
+            res = eval(type, index=n)
+            ir.append(res['information_ratio'])
+            me.append(res['mean_excess_return'])
+            se.append(res['stdev_excess_return'])
+            
+            print 'run #',i+1,'of',runs,'(',round(((i+1.0)/runs),2)*100.0,'% complete)'
+        
+        print 'type:', type
+        print 'N=', n
+        print 'mean ir = ', sum(ir) / runs
+        
+        print 'mean expected returns = ', sum(me) / runs
+        print 'stdev expected returns = ', sum(se) / runs
+        print 'computed in', round((time.time()-s)/60.0, 2), 'minutes'
     
