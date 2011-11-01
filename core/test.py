@@ -2,10 +2,11 @@
 from datetime import datetime
 from datetime import date
 from dateutil import relativedelta
+from itertools import islice
 import time
 
 # custom modules
-import params
+import params2
 import portfolio
 import optimize as op
 import numpy as np
@@ -23,13 +24,12 @@ def jump_by_month(start_date, end_date, month_step=1):
 '''
 
 # get the portfolio parameters
-port_params = params.get_portfolio_params()
-
+port_params = params2.get_portfolio_params(index=125)
 # instantiate the porfolio object
 port = portfolio.Portfolio(port_params, proxy={"http": "http://proxy.jpmchase.net:8443"})
 
 
-
+print port.get_portfolio_historic_position_values().to_string()
 
 '''
 bench = port.get_benchmark_weights().ix[datetime(1990,02,01)]
