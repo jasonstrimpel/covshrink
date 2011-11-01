@@ -260,38 +260,12 @@ class Portfolio(object):
         pandas.DataFrame : pandas.DataFrame containing the weights of the benchmark constituents
         
         """
-        shares = {
-            'AA': 1,
-            'AAPL': 1,
-            'AXP': 1,
-            'BA': 1,
-            'BAC': 1,
-            'BP': 1,
-            'CAT': 1,
-            'CVX': 1,
-            'DD': 1,
-            'DIS': 1,
-            'GE': 1,
-            'HD': 1,
-            'HPQ': 1,
-            'IBM': 1,
-            'INTC': 1,
-            'JNJ': 1,
-            'JPM': 1,
-            'KO': 1,
-            'MCD': 1,
-            'MMM': 1,
-            'MRK': 1,
-            'MSFT': 1,
-            'PFE': 1,
-            'PG': 1,
-            'T': 1,
-            'TGT': 1,
-            'UTX': 1,
-            'VZ': 1,
-            'WMT': 1,
-            'XOM': 1
-        }
+        positions = self._shrs.keys()
+        
+        shares = {}
+        for ticker in positions:
+            shares[ticker] = 1
+
         portvalue = self.get_portfolio_historic_position_values(shares)
         total = portvalue.sum(axis=1)
         
