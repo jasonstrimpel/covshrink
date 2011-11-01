@@ -102,7 +102,7 @@ def eval(type, index=30):
     }
 
 runs = 10
-N = [30, 50, 100]
+N = [15, 30, 50, 75, 100]
 
 start = time.time()
 
