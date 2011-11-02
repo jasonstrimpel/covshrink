@@ -2,6 +2,13 @@
 import tables
 
 def reset_table():
+    """Creates h5f flatfile for storing price data
+    
+    Returns
+    -------
+    h5f handle : returns a writable file handle for pytables table
+    
+    """
     h5f = tables.openFile('price_data.h5', 'w')
 
     description = {
