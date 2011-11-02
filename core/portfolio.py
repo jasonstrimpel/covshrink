@@ -15,11 +15,12 @@ import yahoo
 import inspricehist as ph
 import createdailytable
 
-__all__ = ['_get_historic_data', '_get_historic_returns', '_build_portfolio', 'get_benchmark_weights', 
-                'get_active_weights', 'get_portfolio_weights', 'get_holding_period_returns', 'get_expected_stock_returns',
-                'get_active_returns', 'get_expected_excess_stock_returns', 'get_covariance_matrix',
-                'get_expected_benchmark_return', 'get_benchmark_variance', 'get_expected_portfolio_return',
-                'get_portfolio_variance', 'get_expected_excess_portfolio_return', 'get_tracking_error_variance', 'get_portfolio_size']
+__all__ = ["_get_historic_data", "_get_historic_returns", "get_portfolio_historic_returns", 
+                "get_portfolio_historic_position_values", "get_portfolio_historic_values", "get_benchmark_weights", 
+                "get_benchmark_returns", "get_active_weights", "get_portfolio_weights", "get_expected_stock_returns", 
+                "get_active_returns", "get_expected_excess_stock_returns", "get_covariance_matrix", 
+                "get_shrunk_covariance_matrix", "get_expected_benchmark_return", "get_expected_portfolio_return", 
+                "get_portfolio_size", "get_trading_dates", "information_ratio"]
 
 __version__ = '0.1'
 
@@ -28,7 +29,7 @@ __author__ = 'Jason Strimpel'
 class Portfolio(object):
 
     def __init__(self, portfolio, start=None, end=None, proxy=None):
-        """Initializest the portfolio by creating and populating the data table. Goes out to Yahoo and gets historic 
+        """Initializes the portfolio by creating and populating the data table. Goes out to Yahoo and gets historic 
             data using a Matplotlib method modified to accept a proxy and frequency of data
         
         Parameters
@@ -41,21 +42,36 @@ class Portfolio(object):
                 shares : number of shares held in each position
                 constraints : constraints on the portfolio
                 defaults : miscellaneous default values
-        benchmark : a dictionary of weights of shares in the benchmark index
         
         Usage
         -------
         import params
         
         port_params = params.get_portfolio_params();
-        bench_params = params.get_bench_params();
-        
-        port = Portfolio(port_params, bench_params)
+        port = Portfolio(port_params)
         
         # internal (private) methods
+        print port._get_historic_data(ticker, start, end)
+        print port._get_historic_returns(ticker, start, end, offset=1)
 
-        
         #  public methods
+        print port.get_portfolio_historic_returns()
+        print port.get_portfolio_historic_position_values(shares=None)
+        print port.get_portfolio_historic_values(shares=None)
+        print port.get_benchmark_weights()
+        print port.get_benchmark_returns()
+        print port.get_active_weights()
+        print port.get_portfolio_weights(shares=None)
+        print port.get_expected_stock_returns()
+        print port.get_active_returns()
+        print port.get_expected_excess_stock_returns()
+        print port.get_covariance_matrix(historic_returns)
+        print port.get_shrunk_covariance_matrix(x, shrink=None)
+        print port.get_expected_benchmark_return()
+        print port.get_expected_portfolio_return()
+        print port.get_portfolio_size()
+        print port.get_trading_dates()
+        print port.information_ratio(historic_returns)
 
         """
         # if optional start and end params are not provided, use the default values
@@ -141,44 +157,23 @@ class Portfolio(object):
         return pandas.DataFrame(data, index=dates, dtype='float').sort(ascending=True)
 
     def _get_historic_returns(self, ticker, start, end, offset=1):
-        """
+        """Gets historic data for ticker from start to end and computes offset period returns
         
         Parameters
         ----------
-
+        ticker : ticker symbol for which to get data
+        start : datetime object or string object representing the date for which to begin gathering data
+        end : datetime object or string object representing the date for which to end gathering data
+        offset : periods for which to calculate the returns
         
         Returns
         -------
-
+        pandas.Series : pandas.Series with return data for ticker
         
         """
 
         prices = self._get_historic_data(ticker, start, end)
         return pandas.Series(prices['adjustedClose'] / prices['adjustedClose'].shift(offset) - 1)
-
-    def _build_portfolio(self, shares):
-        """
-        
-        Parameters
-        ----------
-        
-        Returns
-        -------
-        
-        
-        """
-        positions = shares.keys()
-        proxy = self._proxy
-        yh = yahoo.Yahoo(positions, proxy)
-        
-        prices = {}; portfolio = {}
-        for position in positions:
-            prices[position] = yh.get_LastTradePriceOnly(position)
-        
-        portfolio['shares'] = shares
-        portfolio['price'] = prices
-
-        return pandas.DataFrame(portfolio)
 
     def get_portfolio_historic_returns(self):
         """Computes the historic returns of the portfolio
@@ -272,16 +267,29 @@ class Portfolio(object):
         bench_weight = portvalue / total
 
         return bench_weight
-    
-    def get_active_weights(self):
-        """
-        
-        Parameters
-        ----------
-        
+
+    def get_benchmark_returns(self):
+        """Computes the returns on the constituents of the benchmark (same as portfolio only with 1 share)
+
         Returns
         -------
+        pandas.dataFrame : pandas.dataFrame with returns of the benchmark constituents
         
+        """
+        positions = self._shrs.keys()
+        
+        shares = {}
+        for ticker in positions:
+            shares[ticker] = 1
+        
+        return self.get_portfolio_historic_position_values(shares) / self.get_portfolio_historic_position_values(shares).shift(1) - 1
+
+    def get_active_weights(self):
+        """Computes the active portfolio weights
+
+        Returns
+        -------
+        pandas.DataFrame : pandas.DataFrame with active weights for each portfolio component
         
         """
         portfolio = self.get_portfolio_weights()
@@ -305,31 +313,6 @@ class Portfolio(object):
         port_weight = portvalue / portvalue.sum(axis=1)
         
         return port_weight
-    
-    '''
-    def get_holding_period_returns(self):
-        """
-        
-        Parameters
-        ----------
-        
-        Returns
-        -------
-        
-        
-        """
-        holding_periods = self._hld_per
-        positions = holding_periods.keys()
-        
-        holding_period_returns = {}
-        for position in positions:
-            prices = self._get_historic_data(position, holding_periods[position]['start'], holding_periods[position]['end'])
-            holding_period_returns[position] = (prices['adjustedClose'][-1] / prices['adjustedClose'][0]) - 1
-        
-        return pandas.DataFrame({
-            'holding_period_return': holding_period_returns
-        })
-    '''
     
     def get_expected_stock_returns(self):
         """Returns the expected stock returns as defined in the input parameters
@@ -510,22 +493,7 @@ class Portfolio(object):
         return pandas.DataFrame({
             'expected_benchmark_return': bench_weights['bench_weights'] * expected_portfolio_returns['expected_returns']
         })
-    '''
-    def get_benchmark_variance(self):
-        """
-        
-        Returns
-        -------
-        
-        
-        """
-        bench_weights = self.get_benchmark_weights()
-        cov_matrix = self.get_covariance_matrix()
-        
-        return pandas.DataFrame({
-            'benchmark_variance': np.dot(bench_weights.T, np.dot(cov_matrix, bench_weights))
-        })
-    '''
+
     def get_expected_portfolio_return(self):
         """Computes the expected return on the portfolio
 
@@ -542,63 +510,6 @@ class Portfolio(object):
             'expected_portfolio_return': portfolio_weights['port_weights'] * expected_portfolio_returns['expected_returns']
         })
 
-    '''
-    def get_portfolio_variance(self):
-        """
-        
-        Parameters
-        ----------
-        
-        Returns
-        -------
-        
-        
-        """
-        port_weights = self.get_portfolio_weights()
-        cov_matrix = self.get_covariance_matrix()
-        
-        return pandas.DataFrame({
-            'portfolio_variance': np.dot(port_weights.T, np.dot(cov_matrix, port_weights))
-        })
-    '''
-    '''
-    def get_expected_excess_portfolio_return(self):
-        """
-        
-        Parameters
-        ----------
-        
-        Returns
-        -------
-        
-        
-        """
-        active_weights = self.get_active_weights()
-        expected_portfolio_returns = self.get_expected_stock_returns()
-        
-        return pandas.DataFrame({
-            'expected_excess_portfolio_return': active_weights['active_weights'] * expected_portfolio_returns['expected_returns']
-        })
-    '''
-    '''
-    def get_tracking_error_variance(self):
-        """
-        
-        Parameters
-        ----------
-        
-        Returns
-        -------
-        
-        
-        """
-        active_weights = self.get_active_weights()
-        cov_matrix = self.get_covariance_matrix()
-        
-        return pandas.DataFrame({
-            'tracking_error_variance': np.dot(active_weights.T, np.dot(cov_matrix, active_weights))
-        })
-    '''
     def get_portfolio_size(self):
         """Computes the number of assets in the portfolio
         
