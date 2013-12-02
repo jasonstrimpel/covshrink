@@ -33,7 +33,7 @@ def eval(type, index=30):
     port_params = params.get_portfolio_params(index=index)
 
     # instantiate the porfolio object
-    port = portfolio.Portfolio(port_params, proxy={"http": "http://proxy.jpmchase.net:8443"})
+    port = portfolio.Portfolio(port_params, proxy={})
 
     # setup the periodicity
     roll = 60
